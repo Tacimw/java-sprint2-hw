@@ -75,12 +75,19 @@ public class YearlyReport {
                 System.out.println("Отсутствует данные годового отчета за " + year);
                 System.out.println("1 - Загрузить данные из файла");
                 System.out.println("2 - Пропустить");
+                String key = scanner.next();
 
-                int key = scanner.nextInt();
-                if (key == 1) {
+                int input;
+                try {
+                    input = Integer.parseInt(key);
+                } catch (NumberFormatException e ) {
+                    input = 0;
+                }
+
+                if (input == 1) {
                     AddYear();
                     return;
-                } else if (key == 2) {
+                } else if (input == 2) {
                     return;
                 } else {
                     System.out.println("Неизвестная команда");

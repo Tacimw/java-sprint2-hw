@@ -1,8 +1,9 @@
 import java.util.HashMap;
 
 public class ReportDetailed extends Report {
-    HashMap<String, ReportDetail> detailsExpenses;
-    HashMap<String, ReportDetail> detailsProfits;
+    HashMap<String, HashMap<Integer, Integer>> detailsExpenses; // у одного товара в течении месяца в теории может быть разная цена.
+    HashMap<String, HashMap<Integer, Integer>> detailsProfits;
+
 
     ReportDetailed( ) {
         detailsExpenses = new HashMap<>();
@@ -19,13 +20,23 @@ public class ReportDetailed extends Report {
         }
     }
 
-    static void AddToHash(HashMap<String, ReportDetail> details, String aItemName, int aQuantity, int aUnitPrice) {
+    static void AddToHash(HashMap<String, HashMap<Integer, Integer>> details, String aItemName, int aQuantity, int aUnitPrice) {
         if (details.containsKey(aItemName)) {
-            ReportDetail detail = details.get(aItemName);
-            detail.quantity += aQuantity;
-            detail.unit_price += aUnitPrice;
+            HashMap<Integer, Integer> detail = details.get(aItemName);
+            if ( detail == null ) {
+                detail = new HashMap<>();
+            }
+            if ( detail.containsKey(aUnitPrice) ) {
+                Integer quanity = detail.get(aUnitPrice);
+                quanity += aQuantity;
+                detail.put(aUnitPrice, quanity);
+            } else {
+                detail.put(aUnitPrice, aQuantity);
+            }
+
         } else {
-            ReportDetail detail = new ReportDetail(aQuantity, aUnitPrice);
+            HashMap<Integer, Integer> detail = new HashMap<>();
+            detail.put(aUnitPrice, aQuantity);
             details.put(aItemName, detail);
         }
     }
@@ -45,14 +56,16 @@ public class ReportDetailed extends Report {
         return GetMostFrom( detailsProfits );
     }
 
-    static NameAndSum GetMostFrom( HashMap<String, ReportDetail> details ) {
+    static NameAndSum GetMostFrom( HashMap<String, HashMap<Integer,Integer>> details ) {
         String mostName = "";
         int mostSum = 0;
 
         for (String key : details.keySet()) {
-            ReportDetail detail = details.get(key);
-
-            int sum = detail.quantity * detail.unit_price;
+            HashMap<Integer,Integer> detail = details.get(key);
+            int sum = 0;
+            for (Integer price : detail.keySet() ) {
+                sum += detail.get(price) * price;
+            }
 
             if (sum > mostSum) {
                 mostSum = sum;

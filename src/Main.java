@@ -9,8 +9,16 @@ public class Main {
 
         while (true) {
             PrintMenu();
-            int key = scanner.nextInt();
-            switch (key) {
+            String key = scanner.next();
+            int input;
+
+            try {
+                input = Integer.parseInt(key);
+            } catch (NumberFormatException e ) {
+                input = 0;
+            }
+
+            switch (input) {
                 case (1):
                     monthlyReport.AddMonts();
                     break;

@@ -93,12 +93,18 @@ public class MonthlyReport {
                 System.out.println("Отсутствует данные месячного отчета за " + Constants.monthNames[aMonth].toLowerCase());
                 System.out.println("1 - Загрузить данные из файла");
                 System.out.println("2 - Пропустить");
+                String key = scanner.next();
+                int input;
+                try {
+                    input = Integer.parseInt(key);
+                } catch (NumberFormatException e ) {
+                    input = 0;
+                }
 
-                int key = scanner.nextInt();
-                if (key == 1) {
+                if (input == 1) {
                     AddMonth(aMonth);
                     return;
-                } else if (key == 2) {
+                } else if (input == 2) {
                     return;
                 } else {
                     System.out.println("Неизвестная команда");
@@ -123,6 +129,14 @@ public class MonthlyReport {
         CheckReport(aMonth);
         if (reports[aMonth] != null) {
             System.out.println(Constants.monthNames[aMonth] + " " + year);
+
+/*
+            for ( String key : reports[aMonth].detailsProfits.keySet() ) {
+                for ( Integer price : reports[aMonth].detailsProfits.get(key).keySet() ) {
+                    System.out.println(key + " " + price + " " + reports[aMonth].detailsProfits.get(key).get(price));
+                }
+            }
+*/
 
             NameAndSum mostProfitable = reports[aMonth].GetMostProfitable();
             System.out.println("\tСамый прибыльный товар: " + mostProfitable.name + " - " + mostProfitable.sum);
