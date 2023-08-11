@@ -4,14 +4,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class FileReader {
-    ArrayList<String> readFileContents(String fileName) {
-        String path = "./resources/" + fileName;
+    static ArrayList<String> readFileContents(String fileName) {
+        Path path = Path.of("./resources/" + fileName);
         try {
-            return new ArrayList<>(Files.readAllLines(Path.of(path)));
+            return new ArrayList<>(Files.readAllLines(path));
         } catch (IOException e) {
-            System.out.println("Невозможно прочитать файл с отчётом. Возможно, файл отсутствует в нужной директории.");
+            System.out.println("Невозможно прочитать файл с отчётом.");
             return new ArrayList<>();
         }
     }
 
+    static boolean FileIsExist(String fileName) {
+        Path path = Path.of("./resources/" + fileName);
+        return Files.exists(path);
+    }
 }
