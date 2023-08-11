@@ -118,7 +118,7 @@ public class YearlyReport {
                     monthCount++;
                     averageProfit += reports[i].profits;
                     averageExpense += reports[i].expenses;
-                    System.out.println( "\t" + Constants.monthNames[i] + ":" + " ".repeat( Integer.max(2, 10 - Constants.monthNames[i].length() ) ) +  reports[i].profits);
+                    System.out.println( "\t" + Constants.monthNames[i] + ":" + " ".repeat( Integer.max(2, 10 - Constants.monthNames[i].length() ) ) +  ( reports[i].profits - reports[i].expenses ) );
                 }
             }
             if ( monthCount > 0 ) {
