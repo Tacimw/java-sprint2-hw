@@ -1,40 +1,73 @@
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.HashMap;
 
-public class MonthlyReport {
+public class MonthlyReport extends Report {
 
-    ReportDetailed[] reports;
-    short year;
-    Scanner scanner;
+    HashMap<String, ArrayList<ValueRecord>> expenseRecords;
+    HashMap<String, ArrayList<ValueRecord>> profitRecords;
 
-    MonthlyReport(Scanner aScanner, short aYear) {
-        reports = new ReportDetailed[Constants.months];
-        year = aYear;
-        scanner = aScanner;
+    MonthlyReport() {
+        expenseRecords = new HashMap<>();
+        profitRecords = new HashMap<>();
     }
 
-    static String GetFilename(byte aMonth, short aYear) {
+    ReportTotal getBiggestExpense() {
+        return getBiggestFrom(expenseRecords);
+    }
+
+    ReportTotal getBiggestProfit() {
+        return getBiggestFrom(profitRecords);
+    }
+
+    static ReportTotal getBiggestFrom(HashMap<String, ArrayList<ValueRecord>> records ) {
+        String mostName = "";
+        int mostSum = 0;
+
+        for (String  productName: records.keySet()) {
+            ArrayList<ValueRecord> values = records.get(productName);
+            int totalSum = 0;
+            for (ValueRecord value : values  ) {
+                totalSum += value.quanity * value.price;
+            }
+
+            if (totalSum > mostSum) {
+                mostSum = totalSum;
+                mostName = productName;
+            }
+        }
+        return new ReportTotal(mostName, mostSum);
+    }
+
+    void addRecord(String aName, int aPrice, int aQuanity, boolean aIsExpense) {
+        if (aIsExpense) {
+            expenses += aPrice * aQuanity;
+            addRecord(expenseRecords, aName, aPrice, aQuanity);
+        } else {
+            profits += aPrice * aQuanity;
+            addRecord(profitRecords, aName, aPrice, aQuanity);
+        }
+    }
+
+    static void addRecord(HashMap<String, ArrayList<ValueRecord>> aRecords, String aName, int aPrice, int aQuanity) {
+        if (!aRecords.containsKey(aName)) {
+            aRecords.put(aName, new ArrayList<>());
+        }
+        aRecords.get(aName).add(new ValueRecord(aPrice, aQuanity));
+    }
+
+    static String getFilename(int aMonth, int aYear) {
         //m.YYYYMM.csv
         return "m." + aYear + String.format("%02d", aMonth + 1) + ".csv";
     }
 
-    void AddMonts() {
-        for (byte i = 0; i < reports.length; i++) {
-            AddMonth(i);
-        }
-    }
+    static MonthlyReport loadFromFile(String aFileName) {
+        MonthlyReport monthlyReport = null;
 
-    void AddMonth(byte aMonth) {
-        if ( reports[aMonth] != null ) {
-            reports[aMonth].Clear();
-            reports[aMonth] = null;
-        }
-
-        String filename = GetFilename(aMonth, year);
-        if (FileReader.FileIsExist(filename)) {
-            ArrayList<String> lines = FileReader.readFileContents(filename);
+        if (FileReader.FileIsExist(aFileName)) {
+            ArrayList<String> lines = FileReader.readFileContents(aFileName);
 
             if (!lines.isEmpty()) {
+                monthlyReport = new MonthlyReport();
                 for (int i = 1; i < lines.size(); i++) {
                     String[] parts = lines.get(i).split(",");
                     if (parts.length == 4) {
@@ -47,103 +80,20 @@ public class MonthlyReport {
                             quantity = Integer.parseInt(parts[2]);
                             unitPrice = Integer.parseInt(parts[3]);
                         } catch (NumberFormatException e) {
-                            reports[aMonth] = null;
-                            System.out.println("Неверный формат данных в файле месячного отчета за " + Constants.monthNames[aMonth].toLowerCase());
+                            System.out.println(aFileName + ": неверный формат данных.");
                             System.out.println("Строка: " + lines.get(i));
-                            return;
+                            return null;
                         }
-
-                        if (reports[aMonth] == null) {
-                            reports[aMonth] = new ReportDetailed();
-                        }
-                        reports[aMonth].AddDetails(itemName, isExpense, quantity, unitPrice);
+                        monthlyReport.addRecord(itemName, unitPrice, quantity, isExpense);
                     } else {
-                        reports[aMonth] = null;
-                        System.out.println("Неверный формат данных в файле месячного отчета за " + Constants.monthNames[aMonth].toLowerCase());
+                        System.out.println(aFileName + ": неверный формат данных.");
                         System.out.println("Строка: " + lines.get(i));
-                        return;
+                        return null;
                     }
                 }
-            } else {
-                reports[aMonth] = null;
-                System.out.println("Месячный отчет за " + Constants.monthNames[aMonth].toLowerCase() + " не содержит данных.");
-                return;
-            }
-            System.out.println("Данные за " + Constants.monthNames[aMonth].toLowerCase() + " загружены.");
-        } else {
-            reports[aMonth] = null;
-            System.out.println("Отсутствует файл месячного отчета за " + Constants.monthNames[aMonth].toLowerCase());
-        }
-    }
-
-    ReportDetailed GetMonth( byte aMonth ) {
-        ReportDetailed result = null;
-        CheckReport(aMonth);
-        if ((aMonth >= 0) && (aMonth < reports.length)) {
-            result = reports[aMonth];
-        } else {
-            System.out.println("Неверное число месяца " + aMonth );
-        }
-        return result;
-    }
-
-    void CheckReport(byte aMonth) {
-        if (reports[aMonth] == null) {
-            while (true) {
-                System.out.println("Отсутствует данные месячного отчета за " + Constants.monthNames[aMonth].toLowerCase());
-                System.out.println("1 - Загрузить данные из файла");
-                System.out.println("2 - Пропустить");
-                String key = scanner.next();
-                int input;
-                try {
-                    input = Integer.parseInt(key);
-                } catch (NumberFormatException e ) {
-                    input = 0;
-                }
-
-                if (input == 1) {
-                    AddMonth(aMonth);
-                    return;
-                } else if (input == 2) {
-                    return;
-                } else {
-                    System.out.println("Неизвестная команда");
-                }
             }
         }
-    }
 
-    void PrintMonths() {
-        for (byte i = 0; i < reports.length; i++) {
-            PrintMonth(i);
-        }
-    }
-
-
-    void PrintMonth(byte aMonth) {
-        /*
-        название месяца;
-        самый прибыльный товар, название товара и сумму;
-        самую большую трату, название товара и сумму.
-        */
-        CheckReport(aMonth);
-        if (reports[aMonth] != null) {
-            System.out.println(Constants.monthNames[aMonth] + " " + year);
-
-/*
-            for ( String key : reports[aMonth].detailsProfits.keySet() ) {
-                for ( Integer price : reports[aMonth].detailsProfits.get(key).keySet() ) {
-                    System.out.println(key + " " + price + " " + reports[aMonth].detailsProfits.get(key).get(price));
-                }
-            }
-*/
-
-            NameAndSum mostProfitable = reports[aMonth].GetMostProfitable();
-            System.out.println("\tСамый прибыльный товар: " + mostProfitable.name + " - " + mostProfitable.sum);
-
-            NameAndSum mostExpensive = reports[aMonth].GetMostExpensive();
-            System.out.println("\tСамая большая трата:    " + mostExpensive.name + " - " + mostExpensive.sum);
-            System.out.println();
-        }
+        return monthlyReport;
     }
 }

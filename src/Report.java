@@ -1,12 +1,7 @@
+
 public class Report {
-
-    int profits;
     int expenses;
-
-    Report() {
-        profits = 0;
-        expenses = 0;
-    }
+    int profits;
 
     boolean Compare( Report aReport ) {
         return Compare( this, aReport );
