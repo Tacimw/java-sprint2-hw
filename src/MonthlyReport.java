@@ -63,7 +63,7 @@ public class MonthlyReport extends Report {
     static MonthlyReport loadFromFile(String aFileName) {
         MonthlyReport monthlyReport = null;
 
-        if (FileReader.FileIsExist(aFileName)) {
+        if (FileReader.fileIsExist(aFileName)) {
             ArrayList<String> lines = FileReader.readFileContents(aFileName);
 
             if (!lines.isEmpty()) {

@@ -14,7 +14,7 @@ public class FileReader {
         }
     }
 
-    static boolean FileIsExist(String fileName) {
+    static boolean fileIsExist(String fileName) {
         Path path = Path.of("./resources/" + fileName);
         return Files.exists(path);
     }

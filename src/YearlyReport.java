@@ -36,7 +36,7 @@ public class YearlyReport {
 
     public static YearlyReport loadFromFile(String aFileName) {
         YearlyReport yearlyReport = null;
-        if (FileReader.FileIsExist(aFileName)) {
+        if (FileReader.fileIsExist(aFileName)) {
             ArrayList<String> lines = FileReader.readFileContents(aFileName);
 
             if (!lines.isEmpty()) {

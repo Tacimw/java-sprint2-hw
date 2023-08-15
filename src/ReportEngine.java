@@ -66,7 +66,7 @@ public class ReportEngine {
             Report yearly = getYearlyMonthReport(i);
 
             if ( ( monthly != null ) && (yearly != null ) ) {
-                boolean compare = monthly.Compare(yearly);
+                boolean compare = monthly.compare(yearly);
                 if ( !compare ) {
                     System.out.println("Несовпадение данных за " + Constants.monthNames[i].toLowerCase() );
                     noErrors = false;
